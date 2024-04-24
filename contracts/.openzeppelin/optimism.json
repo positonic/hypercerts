@@ -10,7 +10,7 @@
     "5bd56aa108022a80651301eeed96e6ac20fea02040073a01f341a6c8b635d38e": {
       "address": "0xc6FbcFE16D5eBFEd21aCe224C49C94dE49046A04",
       "layout": {
-        "solcVersion": "0.8.16",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
@@ -375,7 +375,7 @@
       "address": "0x396D5f1EF3aa92dDAd4DEad04388374A03BC5577",
       "txHash": "0xaa0093e2c748592309277ebc3f82d2a265071a11fce81822dc75bab1f2ea838e",
       "layout": {
-        "solcVersion": "0.8.16",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
@@ -747,7 +747,7 @@
       "address": "0xDb77A1fDC905685B4052a512522D502638DdA5E3",
       "txHash": "0xeb77995d2103baee6ba64beff908b9ed6653f1b1c9c1373321b8e8770a89a651",
       "layout": {
-        "solcVersion": "0.8.16",
+        "solcVersion": "0.8.19",
 >>>>>>>> develop:contracts/.openzeppelin/sepolia.json
         "storage": [
           {

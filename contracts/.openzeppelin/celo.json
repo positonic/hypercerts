@@ -12,7 +12,7 @@
       "address": "0x620257e9301a813bE7CC5B75AAe8DDA3F6A926D2",
       "txHash": "0x479853237255ea63bb7f1cadd7b72cc793444811a425cac2d6e10e9277ba4c18",
       "layout": {
-        "solcVersion": "0.8.16",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
@@ -307,11 +307,7 @@
           },
           "t_enum(TransferRestrictions)6761": {
             "label": "enum IHypercertToken.TransferRestrictions",
-            "members": [
-              "AllowAll",
-              "DisallowAll",
-              "FromCreatorOnly"
-            ],
+            "members": ["AllowAll", "DisallowAll", "FromCreatorOnly"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -673,11 +669,7 @@
           },
           "t_enum(TransferRestrictions)18919": {
             "label": "enum IHypercertToken.TransferRestrictions",
-            "members": [
-              "AllowAll",
-              "DisallowAll",
-              "FromCreatorOnly"
-            ],
+            "members": ["AllowAll", "DisallowAll", "FromCreatorOnly"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -1039,11 +1031,7 @@
           },
           "t_enum(TransferRestrictions)19459": {
             "label": "enum IHypercertToken.TransferRestrictions",
-            "members": [
-              "AllowAll",
-              "DisallowAll",
-              "FromCreatorOnly"
-            ],
+            "members": ["AllowAll", "DisallowAll", "FromCreatorOnly"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {

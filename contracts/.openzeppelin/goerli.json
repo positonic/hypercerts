@@ -10,7 +10,7 @@
     "ba3b8c36d1292bdec3593f0e2b8f6d2e38d080b76cb70de7876aba5db39b7d86": {
       "address": "0xb5bE374ee965C60c86D5B0C5aA3C6E545ED785c4",
       "layout": {
-        "solcVersion": "0.8.16",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
@@ -305,11 +305,7 @@
           },
           "t_enum(TransferRestrictions)6793": {
             "label": "enum IHypercertToken.TransferRestrictions",
-            "members": [
-              "AllowAll",
-              "DisallowAll",
-              "FromCreatorOnly"
-            ],
+            "members": ["AllowAll", "DisallowAll", "FromCreatorOnly"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
