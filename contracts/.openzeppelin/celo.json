@@ -374,7 +374,7 @@
       "address": "0x17B58b38B1347BF950c31755d86245A3B890e6bD",
       "txHash": "0x01e9c2664d3d3a5f7d763d2c69b7dbce658590aa539e2bbfedb7a1081d6e680f",
       "layout": {
-        "solcVersion": "0.8.17",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
@@ -736,7 +736,7 @@
       "address": "0xcE48266260761F1Ae2FcEc0A7852f355Ea6401B9",
       "txHash": "0x06791bfa435395ed5456022fb124d63bc2e314347de8c090b9f79099650fd3a9",
       "layout": {
-        "solcVersion": "0.8.17",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",

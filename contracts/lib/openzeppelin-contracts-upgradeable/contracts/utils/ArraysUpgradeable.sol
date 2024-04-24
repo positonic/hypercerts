@@ -54,10 +54,13 @@ library ArraysUpgradeable {
      *
      * WARNING: Only use if you are certain `pos` is lower than the array length.
      */
-    function unsafeAccess(address[] storage arr, uint256 pos) internal pure returns (StorageSlotUpgradeable.AddressSlot storage) {
+    function unsafeAccess(
+        address[] storage arr,
+        uint256 pos
+    ) internal pure returns (StorageSlotUpgradeable.AddressSlot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.17/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {
@@ -72,10 +75,13 @@ library ArraysUpgradeable {
      *
      * WARNING: Only use if you are certain `pos` is lower than the array length.
      */
-    function unsafeAccess(bytes32[] storage arr, uint256 pos) internal pure returns (StorageSlotUpgradeable.Bytes32Slot storage) {
+    function unsafeAccess(
+        bytes32[] storage arr,
+        uint256 pos
+    ) internal pure returns (StorageSlotUpgradeable.Bytes32Slot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.17/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {
@@ -90,10 +96,13 @@ library ArraysUpgradeable {
      *
      * WARNING: Only use if you are certain `pos` is lower than the array length.
      */
-    function unsafeAccess(uint256[] storage arr, uint256 pos) internal pure returns (StorageSlotUpgradeable.Uint256Slot storage) {
+    function unsafeAccess(
+        uint256[] storage arr,
+        uint256 pos
+    ) internal pure returns (StorageSlotUpgradeable.Uint256Slot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.17/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
-import {HypercertMinter} from "@hypercerts/protocol/HypercertMinter.sol";
+import { HypercertMinter } from "@hypercerts/protocol/HypercertMinter.sol";
 
 contract MockHypercertMinterWithoutAnyBalanceOf is HypercertMinter {
-    constructor() HypercertMinter() {}
+  constructor() HypercertMinter() {}
 
-    function balanceOf(address, uint256) public view virtual override returns (uint256) {
-        revert("Not implemented");
-    }
+  function balanceOf(address, uint256) public view virtual override returns (uint256) {
+    revert("Not implemented");
+  }
 }

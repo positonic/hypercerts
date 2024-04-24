@@ -1,31 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
 // Interface
-import {IHypercertToken} from "@hypercerts/protocol/interfaces/IHypercertToken.sol";
+import { IHypercertToken } from "@hypercerts/protocol/interfaces/IHypercertToken.sol";
 
 // Libraries
-import {OrderStructs} from "../libraries/OrderStructs.sol";
+import { OrderStructs } from "../libraries/OrderStructs.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
-import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
+import { MerkleProofMemory } from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Enums
-import {QuoteType} from "../enums/QuoteType.sol";
-import {CollectionType} from "../enums/CollectionType.sol";
+import { QuoteType } from "../enums/QuoteType.sol";
+import { CollectionType } from "../enums/CollectionType.sol";
 
 // Shared errors
-import {
-    OrderInvalid,
-    FunctionSelectorInvalid,
-    MerkleProofInvalid,
-    QuoteTypeInvalid,
-    CollectionTypeInvalid,
-    AmountInvalid
-} from "../errors/SharedErrors.sol";
+import { OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInvalid, CollectionTypeInvalid, AmountInvalid } from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
-import {BaseStrategy, IStrategy} from "./BaseStrategy.sol";
+import { BaseStrategy, IStrategy } from "./BaseStrategy.sol";
 
 /**
  * @title StrategyHypercertCollectionOffer
@@ -42,265 +35,272 @@ import {BaseStrategy, IStrategy} from "./BaseStrategy.sol";
  * @author LooksRare protocol team (👀,💎); bitbeckers
  */
 contract StrategyHypercertCollectionOffer is BaseStrategy {
-    using OrderStructs for OrderStructs.Maker;
-    /**
-     * @notice This function validates the order under the context of the chosen strategy and
-     *         returns the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy executes a collection offer against a taker ask order without the need of merkle proofs.
-     * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker
-     * @dev Maker bid additionalParameters: uint256 itemUnitsMaker
-     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     */
+  using OrderStructs for OrderStructs.Maker;
+  /**
+   * @notice This function validates the order under the context of the chosen strategy and
+   *         returns the fulfillable items/amounts/price/nonce invalidation status.
+   *         This strategy executes a collection offer against a taker ask order without the need of merkle proofs.
+   * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker
+   * @dev Maker bid additionalParameters: uint256 itemUnitsMaker
+   * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+   * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
+   */
 
-    function executeHypercertCollectionStrategyWithTakerAsk(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker calldata makerBid
-    )
-        external
-        view
-        returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
-    {
-        if (makerBid.collectionType != CollectionType.Hypercert) {
-            revert CollectionTypeInvalid();
-        }
-
-        price = makerBid.price;
-        amounts = makerBid.amounts;
-
-        (uint256 offeredItemId, uint256 itemUnitsTaker) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
-        (uint256 itemUnitsMaker) = abi.decode(makerBid.additionalParameters, (uint256));
-
-        // A collection order can only be executable for 1 fraction
-        if (
-            amounts.length != 1 || amounts[0] != 1 || itemUnitsTaker != itemUnitsMaker
-                || IHypercertToken(makerBid.collection).unitsOf(offeredItemId) != itemUnitsMaker
-        ) {
-            revert OrderInvalid();
-        }
-
-        itemIds = new uint256[](1);
-        itemIds[0] = offeredItemId;
-        isNonceInvalidated = true;
+  function executeHypercertCollectionStrategyWithTakerAsk(
+    OrderStructs.Taker calldata takerAsk,
+    OrderStructs.Maker calldata makerBid
+  )
+    external
+    view
+    returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+  {
+    if (makerBid.collectionType != CollectionType.Hypercert) {
+      revert CollectionTypeInvalid();
     }
 
-    /**
-     * @notice This function validates the order under the context of the chosen strategy
-     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof.
-     * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] proof
-     * @dev Maker bid additionalParameters: uint256 itemUnitsMaker, bytes32 root
-     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
-     */
-    function executeHypercertCollectionStrategyWithTakerAskWithProof(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker calldata makerBid
-    )
-        external
-        view
-        returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
-    {
-        if (makerBid.collectionType != CollectionType.Hypercert) {
-            revert CollectionTypeInvalid();
-        }
+    price = makerBid.price;
+    amounts = makerBid.amounts;
 
-        price = makerBid.price;
-        amounts = makerBid.amounts;
+    (uint256 offeredItemId, uint256 itemUnitsTaker) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+    uint256 itemUnitsMaker = abi.decode(makerBid.additionalParameters, (uint256));
 
-        (uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] memory proof) =
-            abi.decode(takerAsk.additionalParameters, (uint256, uint256, bytes32[]));
-
-        (uint256 itemUnitsMaker, bytes32 root) = abi.decode(makerBid.additionalParameters, (uint256, bytes32));
-
-        // A collection order can only be executable for 1 fraction
-        if (
-            amounts.length != 1 || amounts[0] != 1 || itemUnitsTaker != itemUnitsMaker
-                || IHypercertToken(makerBid.collection).unitsOf(offeredItemId) != itemUnitsMaker
-        ) {
-            revert OrderInvalid();
-        }
-
-        itemIds = new uint256[](1);
-        itemIds[0] = offeredItemId;
-        isNonceInvalidated = true;
-
-        bytes32 node = keccak256(abi.encodePacked(offeredItemId));
-
-        // Verify the merkle root for the given merkle proof
-        if (!MerkleProofMemory.verify(proof, root, node)) {
-            revert MerkleProofInvalid();
-        }
+    // A collection order can only be executable for 1 fraction
+    if (
+      amounts.length != 1 ||
+      amounts[0] != 1 ||
+      itemUnitsTaker != itemUnitsMaker ||
+      IHypercertToken(makerBid.collection).unitsOf(offeredItemId) != itemUnitsMaker
+    ) {
+      revert OrderInvalid();
     }
 
-    /**
-     * @notice This function validates the order under the context of the chosen strategy
-     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof
-     *         that the address is allowed to fullfil the ask.
-     * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] proof, bytes
-     * signature
-     * @dev Maker bid additionalParameters: uint256 itemUnitsMaker, bytes32 root
-     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
-     */
-    function executeHypercertCollectionStrategyWithTakerAskWithAllowlist(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker calldata makerBid
-    )
-        external
-        view
-        returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
-    {
-        if (makerBid.collectionType != CollectionType.Hypercert) {
-            revert CollectionTypeInvalid();
-        }
+    itemIds = new uint256[](1);
+    itemIds[0] = offeredItemId;
+    isNonceInvalidated = true;
+  }
 
-        price = makerBid.price;
-        amounts = makerBid.amounts;
-
-        (uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] memory proof, bytes memory signature) =
-            abi.decode(takerAsk.additionalParameters, (uint256, uint256, bytes32[], bytes));
-
-        (uint256 itemUnitsMaker, bytes32 root) = abi.decode(makerBid.additionalParameters, (uint256, bytes32));
-
-        validateAmountsAndUnits(makerBid.collection, offeredItemId, amounts, itemUnitsTaker, itemUnitsMaker);
-
-        itemIds = new uint256[](1);
-        itemIds[0] = offeredItemId;
-        isNonceInvalidated = true;
-        address recipient = takerAsk.recipient;
-
-        // Verify the merkle root for the given merkle proof
-        if (!MerkleProofMemory.verify(proof, root, keccak256(abi.encodePacked(recipient)))) {
-            revert MerkleProofInvalid();
-        }
-
-        if (!verifyTakerSignature(makerBid.hash(), offeredItemId, proof, signature, recipient)) {
-            revert OrderInvalid();
-        }
+  /**
+   * @notice This function validates the order under the context of the chosen strategy
+   *         and returns the fulfillable items/amounts/price/nonce invalidation status.
+   *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof.
+   * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] proof
+   * @dev Maker bid additionalParameters: uint256 itemUnitsMaker, bytes32 root
+   * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+   * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
+   * @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
+   */
+  function executeHypercertCollectionStrategyWithTakerAskWithProof(
+    OrderStructs.Taker calldata takerAsk,
+    OrderStructs.Maker calldata makerBid
+  )
+    external
+    view
+    returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+  {
+    if (makerBid.collectionType != CollectionType.Hypercert) {
+      revert CollectionTypeInvalid();
     }
 
-    function validateAmountsAndUnits(
-        address collection,
-        uint256 offeredItemId,
-        uint256[] memory amounts,
-        uint256 itemUnitsTaker,
-        uint256 itemUnitsMaker
-    ) internal view {
-        // A collection order can only be executable for 1 fraction
-        if (
-            amounts.length != 1 || amounts[0] != 1 || itemUnitsTaker != itemUnitsMaker
-                || IHypercertToken(collection).unitsOf(offeredItemId) != itemUnitsMaker
-        ) {
-            revert OrderInvalid();
-        }
+    price = makerBid.price;
+    amounts = makerBid.amounts;
+
+    (uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] memory proof) = abi.decode(
+      takerAsk.additionalParameters,
+      (uint256, uint256, bytes32[])
+    );
+
+    (uint256 itemUnitsMaker, bytes32 root) = abi.decode(makerBid.additionalParameters, (uint256, bytes32));
+
+    // A collection order can only be executable for 1 fraction
+    if (
+      amounts.length != 1 ||
+      amounts[0] != 1 ||
+      itemUnitsTaker != itemUnitsMaker ||
+      IHypercertToken(makerBid.collection).unitsOf(offeredItemId) != itemUnitsMaker
+    ) {
+      revert OrderInvalid();
     }
 
-    /**
-     * @inheritdoc IStrategy
-     */
-    function isMakerOrderValid(OrderStructs.Maker calldata makerBid, bytes4 functionSelector)
-        external
-        pure
-        override
-        returns (bool isValid, bytes4 errorSelector)
-    {
-        if (makerBid.collectionType != CollectionType.Hypercert) {
-            return (isValid, CollectionTypeInvalid.selector);
-        }
+    itemIds = new uint256[](1);
+    itemIds[0] = offeredItemId;
+    isNonceInvalidated = true;
 
-        if (
-            functionSelector != StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAsk.selector
-                && functionSelector
-                    != StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithProof.selector
-                && functionSelector
-                    != StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithAllowlist.selector
-        ) {
-            return (isValid, FunctionSelectorInvalid.selector);
-        }
+    bytes32 node = keccak256(abi.encodePacked(offeredItemId));
 
-        if (makerBid.quoteType != QuoteType.Bid) {
-            return (isValid, QuoteTypeInvalid.selector);
-        }
+    // Verify the merkle root for the given merkle proof
+    if (!MerkleProofMemory.verify(proof, root, node)) {
+      revert MerkleProofInvalid();
+    }
+  }
 
-        // Check if amounts is length 1 with value 1 and additionalParameters is length 32 to check on expected units
-        // received
-        if (makerBid.amounts.length != 1) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        _validateAmountNoRevert(makerBid.amounts[0], makerBid.collectionType);
-
-        // If no root is provided or invalid length, it should be invalid.
-        // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
-        // @dev 64 is the length of the bytes32 array when the merkle root is provided together with 1 uint256
-        // param declared in the additionalParameters (unitsInItem, root).
-        if (
-            (
-                functionSelector
-                    == StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithProof.selector
-                    || functionSelector
-                        == StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithAllowlist.selector
-            ) && makerBid.additionalParameters.length != 64
-        ) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        // Without root
-        if (
-            functionSelector == StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAsk.selector
-                && makerBid.additionalParameters.length != 32
-        ) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        isValid = true;
+  /**
+   * @notice This function validates the order under the context of the chosen strategy
+   *         and returns the fulfillable items/amounts/price/nonce invalidation status.
+   *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof
+   *         that the address is allowed to fullfil the ask.
+   * @dev Taker ask additionalParameters: uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] proof, bytes
+   * signature
+   * @dev Maker bid additionalParameters: uint256 itemUnitsMaker, bytes32 root
+   * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+   * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
+   * @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
+   */
+  function executeHypercertCollectionStrategyWithTakerAskWithAllowlist(
+    OrderStructs.Taker calldata takerAsk,
+    OrderStructs.Maker calldata makerBid
+  )
+    external
+    view
+    returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+  {
+    if (makerBid.collectionType != CollectionType.Hypercert) {
+      revert CollectionTypeInvalid();
     }
 
-    // Function to verify the taker's signature
-    function verifyTakerSignature(
-        bytes32 orderHash,
-        uint256 offeredItemId,
-        bytes32[] memory proof,
-        bytes memory signature,
-        address expectedSigner
-    ) internal pure returns (bool) {
-        bytes32 messageHash = getMessageHash(orderHash, offeredItemId, proof);
+    price = makerBid.price;
+    amounts = makerBid.amounts;
 
-        return recoverSigner(messageHash, signature) == expectedSigner;
+    (uint256 offeredItemId, uint256 itemUnitsTaker, bytes32[] memory proof, bytes memory signature) = abi.decode(
+      takerAsk.additionalParameters,
+      (uint256, uint256, bytes32[], bytes)
+    );
+
+    (uint256 itemUnitsMaker, bytes32 root) = abi.decode(makerBid.additionalParameters, (uint256, bytes32));
+
+    validateAmountsAndUnits(makerBid.collection, offeredItemId, amounts, itemUnitsTaker, itemUnitsMaker);
+
+    itemIds = new uint256[](1);
+    itemIds[0] = offeredItemId;
+    isNonceInvalidated = true;
+    address recipient = takerAsk.recipient;
+
+    // Verify the merkle root for the given merkle proof
+    if (!MerkleProofMemory.verify(proof, root, keccak256(abi.encodePacked(recipient)))) {
+      revert MerkleProofInvalid();
     }
 
-    // Internal function to recreate the message hash
-    function getMessageHash(bytes32 orderHash, uint256 offeredItemId, bytes32[] memory proof)
-        private
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encodePacked(orderHash, offeredItemId, proof));
+    if (!verifyTakerSignature(makerBid.hash(), offeredItemId, proof, signature, recipient)) {
+      revert OrderInvalid();
+    }
+  }
+
+  function validateAmountsAndUnits(
+    address collection,
+    uint256 offeredItemId,
+    uint256[] memory amounts,
+    uint256 itemUnitsTaker,
+    uint256 itemUnitsMaker
+  ) internal view {
+    // A collection order can only be executable for 1 fraction
+    if (
+      amounts.length != 1 ||
+      amounts[0] != 1 ||
+      itemUnitsTaker != itemUnitsMaker ||
+      IHypercertToken(collection).unitsOf(offeredItemId) != itemUnitsMaker
+    ) {
+      revert OrderInvalid();
+    }
+  }
+
+  /**
+   * @inheritdoc IStrategy
+   */
+  function isMakerOrderValid(
+    OrderStructs.Maker calldata makerBid,
+    bytes4 functionSelector
+  ) external pure override returns (bool isValid, bytes4 errorSelector) {
+    if (makerBid.collectionType != CollectionType.Hypercert) {
+      return (isValid, CollectionTypeInvalid.selector);
     }
 
-    // Internal function to recover the signer from the signature
-    function recoverSigner(bytes32 messageHash, bytes memory signature) private pure returns (address) {
-        bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
-
-        (bytes32 r, bytes32 s, uint8 v) = splitSignature(signature);
-
-        return ecrecover(ethSignedMessageHash, v, r, s);
+    if (
+      functionSelector != StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAsk.selector &&
+      functionSelector !=
+      StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithProof.selector &&
+      functionSelector !=
+      StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithAllowlist.selector
+    ) {
+      return (isValid, FunctionSelectorInvalid.selector);
     }
 
-    // Helper function to split the signature into r, s, and v
-    function splitSignature(bytes memory sig) private pure returns (bytes32 r, bytes32 s, uint8 v) {
-        if (sig.length != 65) {
-            revert OrderInvalid();
-        }
-
-        assembly {
-            r := mload(add(sig, 32))
-            s := mload(add(sig, 64))
-            v := byte(0, mload(add(sig, 96)))
-        }
+    if (makerBid.quoteType != QuoteType.Bid) {
+      return (isValid, QuoteTypeInvalid.selector);
     }
+
+    // Check if amounts is length 1 with value 1 and additionalParameters is length 32 to check on expected units
+    // received
+    if (makerBid.amounts.length != 1) {
+      return (isValid, OrderInvalid.selector);
+    }
+
+    _validateAmountNoRevert(makerBid.amounts[0], makerBid.collectionType);
+
+    // If no root is provided or invalid length, it should be invalid.
+    // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
+    // @dev 64 is the length of the bytes32 array when the merkle root is provided together with 1 uint256
+    // param declared in the additionalParameters (unitsInItem, root).
+    if (
+      (functionSelector ==
+        StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithProof.selector ||
+        functionSelector ==
+        StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAskWithAllowlist.selector) &&
+      makerBid.additionalParameters.length != 64
+    ) {
+      return (isValid, OrderInvalid.selector);
+    }
+
+    // Without root
+    if (
+      functionSelector == StrategyHypercertCollectionOffer.executeHypercertCollectionStrategyWithTakerAsk.selector &&
+      makerBid.additionalParameters.length != 32
+    ) {
+      return (isValid, OrderInvalid.selector);
+    }
+
+    isValid = true;
+  }
+
+  // Function to verify the taker's signature
+  function verifyTakerSignature(
+    bytes32 orderHash,
+    uint256 offeredItemId,
+    bytes32[] memory proof,
+    bytes memory signature,
+    address expectedSigner
+  ) internal pure returns (bool) {
+    bytes32 messageHash = getMessageHash(orderHash, offeredItemId, proof);
+
+    return recoverSigner(messageHash, signature) == expectedSigner;
+  }
+
+  // Internal function to recreate the message hash
+  function getMessageHash(
+    bytes32 orderHash,
+    uint256 offeredItemId,
+    bytes32[] memory proof
+  ) private pure returns (bytes32) {
+    return keccak256(abi.encodePacked(orderHash, offeredItemId, proof));
+  }
+
+  // Internal function to recover the signer from the signature
+  function recoverSigner(bytes32 messageHash, bytes memory signature) private pure returns (address) {
+    bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+
+    (bytes32 r, bytes32 s, uint8 v) = splitSignature(signature);
+
+    return ecrecover(ethSignedMessageHash, v, r, s);
+  }
+
+  // Helper function to split the signature into r, s, and v
+  function splitSignature(bytes memory sig) private pure returns (bytes32 r, bytes32 s, uint8 v) {
+    if (sig.length != 65) {
+      revert OrderInvalid();
+    }
+
+    assembly {
+      r := mload(add(sig, 32))
+      s := mload(add(sig, 64))
+      v := byte(0, mload(add(sig, 96)))
+    }
+  }
 }

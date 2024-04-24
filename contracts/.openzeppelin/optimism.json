@@ -741,7 +741,7 @@
       "address": "0xc695a9f30131C3566f5E7A577Cf39Ad7F305eD55",
       "txHash": "0x11b92b34289c6926fd9673c234cb75c9cea9ee1b1c8462ab60745f0061c19ef5",
       "layout": {
-        "solcVersion": "0.8.17",
+        "solcVersion": "0.8.19",
 ========
     "ba3b8c36d1292bdec3593f0e2b8f6d2e38d080b76cb70de7876aba5db39b7d86": {
       "address": "0xDb77A1fDC905685B4052a512522D502638DdA5E3",

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
-import {MockHypercertMinter} from "./MockHypercertMinter.sol";
+import { MockHypercertMinter } from "./MockHypercertMinter.sol";
 
 contract MockHypercertMinterSupportsNoInterface is MockHypercertMinter {
-    function supportsInterface(bytes4) public view virtual override returns (bool) {
-        return false;
-    }
+  function supportsInterface(bytes4) public view virtual override returns (bool) {
+    return false;
+  }
 }

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
 // LooksRare unopinionated libraries
-import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
-import {IWETH} from "@looksrare/contracts-libs/contracts/interfaces/generic/IWETH.sol";
-import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";
+import { LowLevelERC20Transfer } from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
+import { IWETH } from "@looksrare/contracts-libs/contracts/interfaces/generic/IWETH.sol";
+import { IERC20 } from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";
 
 /**
  * @title ProtocolFeeRecipient
@@ -14,41 +14,41 @@ import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IER
  * @author LooksRare protocol team (👀,💎)
  */
 contract ProtocolFeeRecipient is LowLevelERC20Transfer {
-    address public immutable FEE_SHARING_SETTER;
-    IWETH public immutable WETH;
+  address public immutable FEE_SHARING_SETTER;
+  IWETH public immutable WETH;
 
-    error NothingToTransfer();
+  error NothingToTransfer();
 
-    constructor(address _feeSharingSetter, address _weth) {
-        FEE_SHARING_SETTER = _feeSharingSetter;
-        WETH = IWETH(_weth);
+  constructor(address _feeSharingSetter, address _weth) {
+    FEE_SHARING_SETTER = _feeSharingSetter;
+    WETH = IWETH(_weth);
+  }
+
+  function transferETH() external {
+    uint256 ethBalance = address(this).balance;
+
+    if (ethBalance != 0) {
+      WETH.deposit{ value: ethBalance }();
     }
 
-    function transferETH() external {
-        uint256 ethBalance = address(this).balance;
+    uint256 wethBalance = IERC20(address(WETH)).balanceOf(address(this));
 
-        if (ethBalance != 0) {
-            WETH.deposit{value: ethBalance}();
-        }
-
-        uint256 wethBalance = IERC20(address(WETH)).balanceOf(address(this));
-
-        if (wethBalance == 0) {
-            revert NothingToTransfer();
-        }
-        _executeERC20DirectTransfer(address(WETH), FEE_SHARING_SETTER, wethBalance);
+    if (wethBalance == 0) {
+      revert NothingToTransfer();
     }
+    _executeERC20DirectTransfer(address(WETH), FEE_SHARING_SETTER, wethBalance);
+  }
 
-    /**
-     * @param currency ERC20 currency address
-     */
-    function transferERC20(address currency) external {
-        uint256 balance = IERC20(currency).balanceOf(address(this));
-        if (balance == 0) {
-            revert NothingToTransfer();
-        }
-        _executeERC20DirectTransfer(currency, FEE_SHARING_SETTER, balance);
+  /**
+   * @param currency ERC20 currency address
+   */
+  function transferERC20(address currency) external {
+    uint256 balance = IERC20(currency).balanceOf(address(this));
+    if (balance == 0) {
+      revert NothingToTransfer();
     }
+    _executeERC20DirectTransfer(currency, FEE_SHARING_SETTER, balance);
+  }
 
-    receive() external payable {}
+  receive() external payable {}
 }
