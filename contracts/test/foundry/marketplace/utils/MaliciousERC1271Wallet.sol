@@ -1,5 +1,5 @@
 /// SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import { ILooksRareProtocol } from "@hypercerts/marketplace/interfaces/ILooksRareProtocol.sol";
 import { OrderStructs } from "@hypercerts/marketplace/libraries/OrderStructs.sol";

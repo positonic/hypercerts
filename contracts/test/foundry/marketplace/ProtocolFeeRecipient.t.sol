@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 // LooksRare unopinionated libraries
 import { IERC20 } from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";

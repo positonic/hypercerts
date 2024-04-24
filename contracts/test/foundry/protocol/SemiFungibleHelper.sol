@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import { SemiFungible1155 } from "@hypercerts/protocol/SemiFungible1155.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";

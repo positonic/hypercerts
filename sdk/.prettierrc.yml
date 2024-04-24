@@ -10,7 +10,7 @@ useTabs: false
 overrides:
   - files: "*.sol"
     options:
-      compiler: "0.8.19"
+      compiler: "0.8.20"
       tabWidth: 4
   - files: "*.ts"
     options:

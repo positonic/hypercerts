@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 // LooksRare unopinionated libraries
 import { SignatureCheckerCalldata } from "@looksrare/contracts-libs/contracts/SignatureCheckerCalldata.sol";

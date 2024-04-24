@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 // Libraries, interfaces, errors
 import "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";

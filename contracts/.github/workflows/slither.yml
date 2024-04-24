@@ -33,7 +33,7 @@ jobs:
           sarif: results.sarif
           fail-on: none
           node-version: 16
-          solc-version: 0.8.19
+          solc-version: 0.8.20
           target: ./
 
       - name: Upload SARIF file

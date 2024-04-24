@@ -1,5 +1,5 @@
 /// SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 // Murky (third-party) library is used to compute Merkle trees in Solidity
 import { Merkle } from "murky/Merkle.sol";

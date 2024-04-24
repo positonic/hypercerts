@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import { LooksRareProtocol } from "@hypercerts/marketplace/LooksRareProtocol.sol";
 import { TransferManager } from "@hypercerts/marketplace/TransferManager.sol";

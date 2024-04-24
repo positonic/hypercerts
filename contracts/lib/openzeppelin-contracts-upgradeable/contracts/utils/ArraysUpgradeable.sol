@@ -60,7 +60,7 @@ library ArraysUpgradeable {
     ) internal pure returns (StorageSlotUpgradeable.AddressSlot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {
@@ -81,7 +81,7 @@ library ArraysUpgradeable {
     ) internal pure returns (StorageSlotUpgradeable.Bytes32Slot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {
@@ -102,7 +102,7 @@ library ArraysUpgradeable {
     ) internal pure returns (StorageSlotUpgradeable.Uint256Slot storage) {
         bytes32 slot;
         // We use assembly to calculate the storage slot of the element at index `pos` of the dynamic array `arr`
-        // following https://docs.soliditylang.org/en/v0.8.19/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
+        // following https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html#mappings-and-dynamic-arrays.
 
         /// @solidity memory-safe-assembly
         assembly {
